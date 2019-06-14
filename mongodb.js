@@ -130,5 +130,23 @@ MongoClient.connect(
       .catch(err => {
         console.log(err);
       });
+
+    db.collection('tasks')
+      .updateMany(
+        {
+          completed: false,
+        },
+        {
+          $set: {
+            completed: true,
+          },
+        }
+      )
+      .then(res => {
+        console.log(res);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 );
