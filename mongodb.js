@@ -114,39 +114,63 @@ MongoClient.connect(
 
     //update
 
-    const updatePromise = db.collection('users').updateOne(
-      { _id: new ObjectID('5d036d683172cc22d85c8c12') },
-      {
-        $inc: {
-          age: 4,
-        },
-      }
-    );
+    // const updatePromise = db.collection('users').updateOne(
+    //   { _id: new ObjectID('5d036d683172cc22d85c8c12') },
+    //   {
+    //     $inc: {
+    //       age: 4,
+    //     },
+    //   }
+    // );
 
-    updatePromise
-      .then(res => {
-        console.log(res);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    // updatePromise
+    //   .then(res => {
+    //     console.log(res);
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
 
-    db.collection('tasks')
-      .updateMany(
-        {
-          completed: false,
-        },
-        {
-          $set: {
-            completed: true,
-          },
-        }
-      )
-      .then(res => {
-        console.log(res);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    // db.collection('tasks')
+    //   .updateMany(
+    //     {
+    //       completed: false,
+    //     },
+    //     {
+    //       $set: {
+    //         completed: true,
+    //       },
+    //     }
+    //   )
+    //   .then(res => {
+    //     console.log(res);
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
+
+    // delete
+
+    // db.collection('users')
+    //   .deleteMany({
+    //     age: '50',
+    //   })
+    //   .then(res => {
+    //     console.log(res);
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
+
+    // db.collection('tasks')
+    //   .deleteOne({
+    //     name: 'Go to store',
+    //   })
+    //   .then(res => {
+    //     console.log(res);
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
   }
 );
