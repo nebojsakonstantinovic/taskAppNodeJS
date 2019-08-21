@@ -23,6 +23,28 @@ const port = process.env.PORT || 5000;
 //   }
 // });
 
+const multer = require('multer');
+const upload = multer({
+  dest: 'images',
+  limits: {
+    fileSize: 1000000,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(doc|docx)$/)) {
+      return cb(new Error('File must be a Word document'));
+    }
+    cb(undefined, true);
+  },
+});
+
+
+app.post('/upload', upload.single('upload'), (req, res) => {
+  res.send();
+}, (error, req, res, next) => {
+  res.status(400).send({ error: error.message });
+});
+
+
 app.use(express.json());
 
 // user routes
@@ -34,20 +56,3 @@ app.use(taskRouter);
 app.listen(port, () => {
   console.log(`Server runing on port ${port}`);
 });
-
-const Task = require('./models/task');
-const User = require('./models/user');
-
-const main = async () => {
-  // const taskId = '5d56b5a85e8a6d0edcaa344f';
-  // const task = await Task.findById('5d56b5a85e8a6d0edcaa344f');
-  // await task.populate('owner').execPopulate();
-  // console.log(task.owner);
-
-  const user = await User.findById('5d568eaac99ba01b3c637cec');
-  await user.populate('tasks').execPopulate();
-
-  console.log(user.tasks);
-}
-
-main();
