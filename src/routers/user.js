@@ -1,15 +1,17 @@
 const express = require('express');
 const User = require('../models/user');
+const auth = require('../middleware/auth');
 
 const router = new express.Router();
 
-//POST users
+//POST users / create user
 router.post('/users', async (req, res) => {
   const user = new User(req.body);
 
   try {
     await user.save();
-    res.status(201).send(user);
+    const token = await user.generateAuthToken()
+    res.status(201).send({user, token});
   } catch (error) {
     res.status(400).send(error);
   }
@@ -25,6 +27,48 @@ router.post('/users', async (req, res) => {
   //   });
 
   // res.send('test');
+});
+
+//POST users/login
+router.post('/users/login', async (req, res) => {
+  try {
+    const user = await User.findByCredentials(req.body.email, req.body.password);
+    const token = await user.generateAuthToken();
+    res.send({user, token});
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+//POST users/logout
+router.post('/users/logout', auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((item) => {
+      return item.token !== req.token;
+    });
+    await req.user.save();
+
+    res.send();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//POST users/logoutAll
+router.post('/users/logoutAll', auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
+    await req.user.save();
+
+    res.send();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//GET users/me
+router.get('/users/me', auth, async (req, res) => {
+  res.send(req.user);
 });
 
 //GET users
@@ -78,7 +122,7 @@ router.get('/users/:id', async (req, res) => {
 });
 
 // update user
-router.patch('/users/:id', async (req, res) => {
+router.patch('/users/me', auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ['name', 'email', 'password', 'age'];
   const isValidOperation = updates.every((update) => {
@@ -90,26 +134,36 @@ router.patch('/users/:id', async (req, res) => {
   }
 
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    // const user = await User.findById(req.params.id);
 
-    if (!user) {
-      return res.status(404).send();
-    }
-    return res.send(user);
+    updates.forEach(update => req.user[update] = req.body[update]);
+
+    await req.user.save();
+
+    // const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }); // ignores middleware
+
+    // if (!user) {
+    //   return res.status(404).send();
+    // }
+    return res.send(req.user);
   } catch (error) {
+    console.log(error);
     res.status(400).send(error);
   }
 })
 
 // delete user
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/me', auth, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    // const user = await User.findByIdAndDelete(req.user._id);
 
-    if (!user) {
-      return res.status(404).send();
-    }
-    res.send(user);
+    // if (!user) {
+    //   return res.status(404).send();
+    // }
+
+    await req.user.remove();
+
+    res.send(req.user);
   } catch (error) {
     res.status(500).send(error);
   }
